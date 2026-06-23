@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0F6E56">
+<title>Despesas Pessoais</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@latest/dist/tabler-icons.min.css">
+<style>
+  :root {
+    --green:      #1D9E75;
+    --green-dark: #0F6E56;
+    --green-deep: #085041;
+    --green-light:#E1F5EE;
+    --green-mid:  #9FE1CB;
+    --red:        #D85A30;
+    --red-light:  #FAECE7;
+    --text:       #1a1a1a;
+    --text-2:     #555;
+    --text-3:     #999;
+    --bg:         #f5f5f3;
+    --surface:    #ffffff;
+    --border:     rgba(0,0,0,0.08);
+    --radius:     16px;
+    --radius-sm:  10px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --text:    #f0f0ee;
+      --text-2:  #aaa;
+      --text-3:  #666;
+      --bg:      #141414;
+      --surface: #1e1e1e;
+      --border:  rgba(255,255,255,0.08);
+    }
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  html { background: var(--bg); }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; }
+
+  .app { max-width: 480px; margin: 0 auto; padding: 0 0 3rem; }
+
+  .hero {
+    background: var(--green-dark);
+    border-radius: 0 0 32px 32px;
+    padding: env(safe-area-inset-top, 16px) 20px 28px;
+    margin-bottom: -16px;
+  }
+  .hero-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; padding-top: 8px; }
+  .hero-top h1 { font-size: 17px; font-weight: 600; color: var(--green-light); letter-spacing: -0.01em; }
+  .hero-badge { background: rgba(255,255,255,0.12); color: var(--green-mid); font-size: 12px; padding: 4px 10px; border-radius: 999px; }
+  .hero-total-label { font-size: 13px; color: var(--green-mid); margin-bottom: 4px; }
+  .hero-total { font-size: 40px; font-weight: 700; color: #fff; letter-spacing: -0.03em; line-height: 1; }
+  .hero-sub { font-size: 13px; color: var(--green-mid); margin-top: 6px; }
+
+  .stats { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 24px 16px 0; position: relative; z-index: 1; }
+  .stat { background: var(--surface); border-radius: var(--radius-sm); padding: 14px 16px; border: 1px solid var(--border); }
+  .stat-label { font-size: 11px; color: var(--text-3); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 4px; }
+  .stat-value { font-size: 26px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+
+  .section { padding: 20px 16px 0; }
+  .section-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
+  .section-title { font-size: 15px; font-weight: 600; color: var(--text); }
+  .section-action { font-size: 13px; color: var(--green); background: none; border: none; cursor: pointer; font-family: inherit; padding: 4px 0; }
+
+  .mic-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 24px 20px; text-align: center; }
+  .mic-btn {
+    width: 88px; height: 88px; border-radius: 50%; border: none;
+    background: var(--green); color: #fff; font-size: 36px;
+    cursor: pointer; display: flex; align-items: center; justify-content: center;
+    margin: 0 auto 16px; transition: transform 0.12s, background 0.15s;
+  }
+  .mic-btn:active { transform: scale(0.92); }
+  .mic-btn.listening { background: var(--red); animation: pulse 1.4s infinite; }
+  @keyframes pulse {
+    0%,100% { box-shadow: 0 0 0 0 rgba(216,90,48,0.4); }
+    60%      { box-shadow: 0 0 0 16px rgba(216,90,48,0); }
+  }
+  .mic-transcript { font-size: 16px; font-weight: 600; color: var(--text); min-height: 24px; margin-bottom: 6px; }
+  .mic-hint { font-size: 13px; color: var(--text-3); line-height: 1.5; }
+
+  .manual-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 14px; }
+  .field-row { display: flex; gap: 8px; }
+  .field-row select, .field-row input {
+    flex: 1; min-width: 0; height: 48px;
+    border: 1px solid var(--border); border-radius: var(--radius-sm);
+    padding: 0 12px; font-size: 15px;
+    background: var(--bg); color: var(--text);
+    font-family: inherit; -webkit-appearance: none; appearance: none;
+  }
+  .field-row select:focus, .field-row input:focus { outline: 2px solid var(--green); outline-offset: -1px; }
+  .add-btn {
+    height: 48px; padding: 0 18px; border-radius: var(--radius-sm);
+    border: none; background: var(--green); color: #fff;
+    cursor: pointer; font-size: 22px; display: flex; align-items: center;
+    transition: background 0.12s; flex-shrink: 0;
+  }
+  .add-btn:active { background: var(--green-dark); transform: scale(0.96); }
+
+  .entries-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); overflow: hidden; }
+  .entry { display: flex; align-items: center; gap: 12px; padding: 13px 16px; border-bottom: 1px solid var(--border); }
+  .entry:last-child { border-bottom: none; }
+  .entry-icon { width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .entry-body { flex: 1; min-width: 0; }
+  .entry-cat { font-size: 15px; font-weight: 600; color: var(--text); }
+  .entry-dt { font-size: 11px; color: var(--text-3); margin-top: 2px; display: flex; gap: 8px; }
+  .entry-right { display: flex; align-items: center; gap: 6px; }
+  .entry-amount { font-size: 15px; font-weight: 700; color: var(--text); white-space: nowrap; }
+  .del-btn { background: none; border: none; cursor: pointer; color: var(--text-3); font-size: 18px; padding: 6px; border-radius: 8px; line-height: 1; }
+  .del-btn:active { color: var(--red); background: var(--red-light); }
+
+  .chart-card { background: var(--surface); border-radius: var(--radius); border: 1px solid var(--border); padding: 16px; }
+  .bar-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+  .bar-row:last-child { margin-bottom: 0; }
+  .bar-label { font-size: 12px; color: var(--text-2); width: 88px; flex-shrink: 0; text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .bar-track { flex: 1; height: 24px; background: var(--bg); border-radius: 6px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 6px; transition: width 0.5s cubic-bezier(.4,0,.2,1); }
+  .bar-val { font-size: 12px; color: var(--text-2); width: 76px; text-align: right; flex-shrink: 0; white-space: nowrap; }
+
+  .toast {
+    position: fixed; bottom: 32px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: #1a1a1a; color: #fff; font-size: 14px; font-weight: 500;
+    padding: 12px 22px; border-radius: 999px; white-space: nowrap;
+    transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), opacity 0.3s;
+    opacity: 0; z-index: 999; pointer-events: none;
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+  .toast.error { background: var(--red); }
+
+  .status-bar { display: flex; align-items: center; gap: 8px; padding: 16px 16px 0; font-size: 12px; color: var(--text-3); }
+  .status-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .status-dot.error { background: var(--red); }
+
+  .empty { text-align: center; padding: 2.5rem 1rem; color: var(--text-3); font-size: 14px; }
+  .empty i { font-size: 32px; display: block; margin-bottom: 8px; opacity: 0.35; }
+
+  .loading { text-align: center; padding: 2rem; color: var(--text-3); font-size: 14px; }
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="hero">
+    <div class="hero-top">
+      <h1>Despesas pessoais</h1>
+      <span class="hero-badge" id="month-label"></span>
+    </div>
+    <div class="hero-total-label">Total do mês</div>
+    <div class="hero-total" id="total-val">R$ 0,00</div>
+    <div class="hero-sub" id="hero-sub">Carregando...</div>
+  </div>
+
+  <div class="stats">
+    <div class="stat"><div class="stat-label">Lançamentos</div><div class="stat-value" id="count-val">—</div></div>
+    <div class="stat"><div class="stat-label">Categorias</div><div class="stat-value" id="cats-val">—</div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">Entrada por voz</span></div>
+    <div class="mic-card">
+      <button class="mic-btn" id="mic-btn" aria-label="Gravar voz">
+        <i class="ti ti-microphone"></i>
+      </button>
+      <div class="mic-transcript" id="transcript">Toque no microfone e fale</div>
+      <div class="mic-hint" id="mic-status">Ex: "Combustível 300" &nbsp;·&nbsp; "Lazer 80"</div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">Adicionar manualmente</span></div>
+    <div class="manual-card">
+      <div class="field-row">
+        <select id="manual-cat" aria-label="Categoria">
+          <option value="">Categoria</option>
+          <option>Combustível</option>
+          <option>Alimentação</option>
+          <option>Lazer</option>
+          <option>Saúde</option>
+          <option>Transporte</option>
+          <option>Moradia</option>
+          <option>Educação</option>
+          <option>Vestuário</option>
+          <option>Outros</option>
+        </select>
+        <input type="number" id="manual-val" placeholder="R$ valor" min="0" step="0.01" inputmode="decimal" aria-label="Valor">
+        <button class="add-btn" onclick="addManual()" aria-label="Adicionar">
+          <i class="ti ti-plus"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="section">
+    <div class="section-head">
+      <span class="section-title">Lançamentos</span>
+      <button class="section-action" onclick="clearAll()">Limpar tudo</button>
+    </div>
+    <div id="list-container"><div class="entries-card"><div class="loading">Carregando...</div></div></div>
+  </div>
+
+  <div class="section">
+    <div class="section-head"><span class="section-title">Por categoria</span></div>
+    <div class="chart-card" id="chart-container"><div class="loading">Carregando...</div></div>
+  </div>
+
+  <div class="status-bar">
+    <div class="status-dot" id="status-dot"></div>
+    <span id="status-text">Conectando...</span>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const API = '';
+
+const CAT_META = {
+  'Combustível': {bg:'#E1F5EE',color:'#085041',icon:'ti-gas-station'},
+  'Alimentação': {bg:'#E6F1FB',color:'#042C53',icon:'ti-tools-kitchen-2'},
+  'Lazer':       {bg:'#FAEEDA',color:'#412402',icon:'ti-device-gamepad-2'},
+  'Saúde':       {bg:'#FAECE7',color:'#4A1B0C',icon:'ti-heart-rate-monitor'},
+  'Transporte':  {bg:'#EEEDFE',color:'#26215C',icon:'ti-bus'},
+  'Moradia':     {bg:'#EAF3DE',color:'#173404',icon:'ti-home-2'},
+  'Educação':    {bg:'#FBEAF0',color:'#4B1528',icon:'ti-book'},
+  'Vestuário':   {bg:'#F1EFE8',color:'#2C2C2A',icon:'ti-hanger'},
+  'Outros':      {bg:'#F1EFE8',color:'#444441',icon:'ti-dots'}
+};
+const BAR_COLORS = ['#1D9E75','#378ADD','#BA7517','#D85A30','#534AB7','#639922','#993556','#5F5E5A'];
+
+let entries = [];
+
+function fmtR(v) {
+  return 'R$ ' + v.toLocaleString('pt-BR', {minimumFractionDigits:2, maximumFractionDigits:2});
+}
+
+function getNow() {
+  const n = new Date();
+  return {
+    date: n.toLocaleDateString('pt-BR', {day:'2-digit',month:'2-digit',year:'2-digit'}),
+    time: n.toLocaleTimeString('pt-BR', {hour:'2-digit',minute:'2-digit'}),
+    ts:   n.getTime()
+  };
+}
+
+let toastTimer;
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = 'toast show' + (isError ? ' error' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => t.className = 'toast', 2800);
+}
+
+function setStatus(ok, msg) {
+  document.getElementById('status-dot').className = 'status-dot' + (ok ? '' : ' error');
+  document.getElementById('status-text').textContent = msg;
+}
+
+async function loadEntries() {
+  try {
+    const r = await fetch(`${API}/api/despesas`);
+    entries = await r.json();
+    setStatus(true, 'Dados salvos na nuvem');
+    render();
+  } catch(e) {
+    setStatus(false, 'Erro ao carregar dados');
+    render();
+  }
+}
+
+async function addEntry(cat, val) {
+  const entry = { id: Date.now(), cat, val: parseFloat(val), ...getNow() };
+  try {
+    const r = await fetch(`${API}/api/despesas`, {
+      method: 'POST',
+      headers: {'Content-Type':'application/json'},
+      body: JSON.stringify(entry)
+    });
+    if (!r.ok) throw new Error();
+    entries.unshift(entry);
+    render();
+    showToast(`${cat}: ${fmtR(parseFloat(val))} salvo`);
+  } catch(e) {
+    showToast('Erro ao salvar', true);
+  }
+}
+
+async function deleteEntry(id) {
+  try {
+    await fetch(`${API}/api/despesas/${id}`, {method:'DELETE'});
+    entries = entries.filter(e => e.id !== id);
+    render();
+    showToast('Lançamento removido');
+  } catch(e) {
+    showToast('Erro ao remover', true);
+  }
+}
+
+async function clearAll() {
+  if (!confirm('Limpar todos os lançamentos?')) return;
+  try {
+    await fetch(`${API}/api/despesas/clear`, {method:'POST'});
+    entries = [];
+    render();
+    showToast('Todos os lançamentos removidos');
+  } catch(e) {
+    showToast('Erro ao limpar', true);
+  }
+}
+
+function render() {
+  const total = entries.reduce((s,e) => s + e.val, 0);
+  const catSet = new Set(entries.map(e => e.cat));
+  document.getElementById('total-val').textContent = fmtR(total);
+  document.getElementById('count-val').textContent = entries.length;
+  document.getElementById('cats-val').textContent = catSet.size;
+  document.getElementById('hero-sub').textContent =
+    entries.length === 0 ? 'Nenhum lançamento ainda' :
+    entries.length === 1 ? '1 lançamento registrado' :
+    `${entries.length} lançamentos registrados`;
+
+  const lc = document.getElementById('list-container');
+  if (!entries.length) {
+    lc.innerHTML = '<div class="entries-card"><div class="empty"><i class="ti ti-receipt-off"></i>Nenhum lançamento ainda</div></div>';
+  } else {
+    lc.innerHTML = '<div class="entries-card">' + entries.map(e => {
+      const m = CAT_META[e.cat] || CAT_META['Outros'];
+      return `<div class="entry">
+        <div class="entry-icon" style="background:${m.bg}">
+          <i class="ti ${m.icon}" style="color:${m.color}"></i>
+        </div>
+        <div class="entry-body">
+          <div class="entry-cat">${e.cat}</div>
+          <div class="entry-dt">
+            <span><i class="ti ti-calendar" style="font-size:11px;vertical-align:-1px"></i> ${e.date}</span>
+            <span><i class="ti ti-clock" style="font-size:11px;vertical-align:-1px"></i> ${e.time}</span>
+          </div>
+        </div>
+        <div class="entry-right">
+          <span class="entry-amount">${fmtR(e.val)}</span>
+          <button class="del-btn" onclick="deleteEntry(${e.id})" aria-label="Remover">
+            <i class="ti ti-trash"></i>
+          </button>
+        </div>
+      </div>`;
+    }).join('') + '</div>';
+  }
+
+  const catTotals = {};
+  entries.forEach(e => { catTotals[e.cat] = (catTotals[e.cat]||0) + e.val; });
+  const sorted = Object.entries(catTotals).sort((a,b) => b[1]-a[1]);
+  const cc = document.getElementById('chart-container');
+  if (!sorted.length) { cc.innerHTML = '<div class="empty">Nenhum dado ainda</div>'; return; }
+  const maxVal = sorted[0][1];
+  cc.innerHTML = sorted.map(([cat,val],i) => {
+    const pct = Math.round(val/maxVal*100);
+    return `<div class="bar-row">
+      <div class="bar-label">${cat}</div>
+      <div class="bar-track"><div class="bar-fill" style="width:${pct}%;background:${BAR_COLORS[i%BAR_COLORS.length]}"></div></div>
+      <div class="bar-val">${fmtR(val)}</div>
+    </div>`;
+  }).join('');
+}
+
+function parseVoice(text) {
+  const lower = text.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'');
+  const catMap = {};
+  Object.keys(CAT_META).forEach(c => {
+    catMap[c.toLowerCase().normalize('NFD').replace(/[\u0300-\u036f]/g,'')] = c;
+  });
+  let foundCat = null;
+  for (const [k,v] of Object.entries(catMap)) {
+    if (lower.includes(k)) { foundCat = v; break; }
+  }
+  const nums = text.match(/\d+([.,]\d{1,2})?/g);
+  const val = nums ? parseFloat(nums[0].replace(',','.')) : null;
+  return {cat: foundCat, val};
+}
+
+function addManual() {
+  const cat = document.getElementById('manual-cat').value;
+  const val = document.getElementById('manual-val').value;
+  if (!cat || !val || parseFloat(val) <= 0) { showToast('Preencha categoria e valor', true); return; }
+  addEntry(cat, val);
+  document.getElementById('manual-cat').value = '';
+  document.getElementById('manual-val').value = '';
+}
+
+const micBtn = document.getElementById('mic-btn');
+const transcriptEl = document.getElementById('transcript');
+const micStatusEl = document.getElementById('mic-status');
+let recognition = null, listening = false;
+
+function setupSpeech() {
+  const SR = window.SpeechRecognition || window.webkitSpeechRecognition;
+  if (!SR) { micStatusEl.textContent = 'Reconhecimento de voz não suportado.'; micBtn.disabled = true; return; }
+  recognition = new SR();
+  recognition.lang = 'pt-BR';
+  recognition.continuous = false;
+  recognition.interimResults = true;
+  recognition.onstart = () => {
+    listening = true; micBtn.classList.add('listening');
+    transcriptEl.textContent = 'Ouvindo...';
+    micStatusEl.textContent = 'Fale agora — ex: "Combustível 300"';
+  };
+  recognition.onresult = (e) => {
+    let interim = '', final = '';
+    for (let i = e.resultIndex; i < e.results.length; i++) {
+      if (e.results[i].isFinal) final += e.results[i][0].transcript;
+      else interim += e.results[i][0].transcript;
+    }
+    transcriptEl.textContent = final || interim || 'Ouvindo...';
+    if (final) {
+      const {cat, val} = parseVoice(final);
+      if (cat && val && val > 0) {
+        addEntry(cat, val);
+        transcriptEl.textContent = `${cat}: ${fmtR(val)}`;
+        micStatusEl.textContent = 'Lançamento salvo!';
+      } else {
+        micStatusEl.textContent = 'Não entendi. Tente: "Alimentação 150"';
+      }
+    }
+  };
+  recognition.onerror = (e) => {
+    micStatusEl.textContent = e.error === 'not-allowed' ? 'Permissão de microfone negada.' : 'Erro. Tente novamente.';
+    stopListening();
+  };
+  recognition.onend = () => stopListening();
+}
+
+function stopListening() {
+  listening = false; micBtn.classList.remove('listening');
+  setTimeout(() => {
+    if (!listening) {
+      transcriptEl.textContent = 'Toque no microfone e fale';
+      micStatusEl.textContent = 'Ex: "Combustível 300" · "Lazer 80"';
+    }
+  }, 2500);
+}
+
+micBtn.addEventListener('click', () => {
+  if (!recognition) { setupSpeech(); if (!recognition) return; }
+  if (listening) { recognition.stop(); stopListening(); }
+  else { try { recognition.start(); } catch(e) { recognition=null; setupSpeech(); recognition&&recognition.start(); } }
+});
+
+const now = new Date();
+document.getElementById('month-label').textContent =
+  now.toLocaleDateString('pt-BR', {month:'long', year:'numeric'});
+
+loadEntries();
+</script>
+</body>
+</html>
